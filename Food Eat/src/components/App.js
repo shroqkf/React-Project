@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getFoods } from "../api";
 import FoodList from "./FoodList";
-import mockItems from "../mock.json";
 
 function App() {
   const [order, setOrder] = useState("createdAt");
-  const [items, setItems] = useState(mockItems);
+  const [items, setItems] = useState([]);
   //삭제 버튼을 클릭할 때마다 일어나는 일을 살펴봅시다.
   //우선 보여줄 배열을 해당 요소가 제외된 배열로 변경합니다.
   //그리고 리액트에서 재렌더링을 해서 변경된 데이터를 보여주어야 하죠.
@@ -22,7 +22,20 @@ function App() {
     setItems(nextItems);
   };
 
+ //getFoods() 함수는 아규먼트로 order 값에 해당하는 값을 받으니까, 
+ //handleLoad() 함수를 조금 수정해서 orderQuery라는 파라미터를 받고 이걸 getFoods() 함수에 넘겨 준다.
+  const handleLoad = async (orderQuery) => {
+    const { foods } = await getFoods(orderQuery);
+    setItems(foods);
+  };
+  //참고로 여기서 orderQuery라고 이름 붙인 건 order 스테이트와 이름이 겹치지 않도록 하기 위해서임.
+
   const sortedItems = items.sort((a, b) => b[order] - a[order]);
+
+  useEffect(() => {
+    handleLoad(order);
+  }, [order]); 
+  //useEffect() 함수의 두 번째 아규먼트로 [order]를 사용하면 order 스테이트 값이 바뀔 때마다 콜백 함수를 실행할 수 있다.
 
   return (
     <div>
